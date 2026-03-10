@@ -1,0 +1,49 @@
+<div class="sidebar p-3" style="width: 280px; min-height: 100vh; background: #0d1b2a; color: white; position: fixed;">
+    <h4 class="text-center py-3">UMS PORTAL</h4>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a href="/" class="nav-link <%= page === 'dashboard' ? 'active' : 'text-white' %>">
+                <i class="bi bi-house-door me-2"></i> แผงควบคุม (Dashboard)
+            </a>
+        </li>
+        <li>
+            <a href="/academic" class="nav-link <%= page === 'academic' ? 'active' : 'text-white' %>">
+                <i class="bi bi-calendar3 me-2"></i> ตารางเรียนและหลักสูตร
+            </a>
+        </li>
+        <li>
+            <a href="/registration" class="nav-link <%= page === 'registration' ? 'active' : 'text-white' %>">
+                <i class="bi bi-pencil-square me-2"></i> ลงทะเบียนเรียน
+            </a>
+        </li>
+        <li>
+            <a href="/lms" class="nav-link <%= page === 'lms' ? 'active' : 'text-white' %>">
+                <i class="bi bi-book me-2"></i> จัดการเรียน (LMS)
+            </a>
+        </li>
+        <li>
+            <a href="/events" class="nav-link <%= page === 'events' ? 'active' : 'text-white' %>">
+                <i class="bi bi-trophy me-2"></i> กิจกรรม (Events)
+            </a>
+        </li>
+        <li>
+            <a href="/evaluation" class="nav-link <%= page === 'evaluation' ? 'active' : 'text-white' %>">
+                <i class="bi bi-star me-2"></i> ประเมินอาจารย์
+            </a>
+        </li>
+    </ul>
+    <hr>
+    <div class="dropdown mt-auto">
+        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+            <img src="https://ui-avatars.com/api/?name=Student+User" width="32" height="32" class="rounded-circle me-2">
+            <strong>ข้อมูลผู้ใช้</strong>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+            <li><a class="dropdown-item" href="#">โปรไฟล์</a></li>
+            <li><a class="dropdown-item" href="settings">ตั้งค่า</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="login">ออกจากระบบ</a></li>
+        </ul>
+    </div>
+</div>
