@@ -435,3 +435,22 @@ WHERE sr.StuRegisStatus = 'ENROLLED'
 GROUP BY u.UserID, u.UserFName, u.UserLName;
 
 SELECT * FROM v_student_credits;
+
+-- View 1: v_user_profile (รวมข้อมูลนักศึกษากับชื่อคณะและสาขา ไว้ใช้โชว์ในหน้า Settings)
+CREATE OR REPLACE VIEW v_user_profile AS
+SELECT 
+    u.UserID, u.UserFName, u.UserLName, u.UserEmail, u.UserPass, u.UserType,
+    f.FNameTHA AS FacultyName, 
+    m.MjNameTHA AS MajorName
+FROM UserInfo u
+LEFT JOIN Fact f ON u.FCode = f.FCode
+LEFT JOIN Major m ON u.MjCode = m.MjCode;
+
+-- View 2: v_event_attendees (ดูว่ามีนักศึกษาคนไหนลงทะเบียนเข้าร่วมกิจกรรม(Event) บ้าง)
+CREATE OR REPLACE VIEW v_event_attendees AS
+SELECT 
+    e.EventID, e.EventName, e.EventStartDate,
+    u.UserID, CONCAT(u.UserFName, ' ', u.UserLName) AS FullName
+FROM Register r
+JOIN Event e ON r.EventID = e.EventID
+JOIN UserInfo u ON r.UserID = u.UserID;
