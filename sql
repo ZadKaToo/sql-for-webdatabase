@@ -211,6 +211,11 @@ INSERT INTO UserInfo (UserID, UserFName, UserLName, UserEmail, UserPass, FCode, 
 (10009, 'Ian', 'McKellen', 'ian@edu.com', 'hash9', 'F009', 'M009', 'STD'),
 (10010, 'Jack', 'Sparrow', 'jack@edu.com', 'hash10', 'F010', 'M010', 'STD');
 
+INSERT INTO UserInfo (UserID, UserFName, UserLName, UserEmail, UserPass, FCode, MjCode, UserType) 
+VALUES 
+(99999, 'ผู้ดูแล', 'ระบบส่วนกลาง', 'admin@ums.com', 'admin1234', NULL, NULL, 'ADMIN'),
+(99998, 'สมศรี', 'ใจดี', 'somsri.admin@ums.com', '1234', NULL, NULL, 'ADMIN');
+
 -- 6. Subject
 INSERT INTO Subject (SubjCode, SubjName, SubjCredit, FCode, SubjType) VALUES 
 ('CS101', 'Database Systems', 3, 'F001', 'Core'),
@@ -454,3 +459,47 @@ SELECT
 FROM Register r
 JOIN Event e ON r.EventID = e.EventID
 JOIN UserInfo u ON r.UserID = u.UserID;
+
+-- 1. View สำหรับหน้า LMS (การบ้านของนักศึกษา)
+CREATE OR REPLACE VIEW v_student_lms_assignments AS
+SELECT sr.UserID, sa.AssName, s.SubjName, sa.Dateline, sa.Score, IFNULL(ans.Status, 'ยังไม่ส่ง') AS Status
+FROM StudyRegister sr
+JOIN TeachAssignment ta ON sr.TAssignID = ta.TAssignID
+JOIN Subject s ON ta.SubjCode = s.SubjCode
+JOIN StdAssignment sa ON s.SubjCode = sa.SubjCode
+LEFT JOIN AssignScore ans ON sa.AssignID = ans.AssignID AND ans.UserID = sr.UserID;
+
+-- 2. View สำหรับหน้า LMS (เกรดของนักศึกษา)
+CREATE OR REPLACE VIEW v_student_grades AS
+SELECT sr.UserID, s.SubjCode, s.SubjName, s.SubjCredit, g.GradeResult
+FROM Grade g
+JOIN StudyRegister sr ON g.StuRegisID = sr.StuRegisID
+JOIN TeachAssignment ta ON sr.TAssignID = ta.TAssignID
+JOIN Subject s ON ta.SubjCode = s.SubjCode;
+
+-- 3. View สำหรับหน้า Registration (รายวิชาทั้งหมดที่เปิดสอน)
+CREATE OR REPLACE VIEW v_course_details AS
+SELECT ta.TAssignID, s.SubjCode, s.SubjName, s.SubjCredit,
+       CONCAT(t.TFName, ' ', t.TLName) AS TeacherName,
+       ta.StudyDay, ta.StartTime, ta.EndTime, ta.Room
+FROM TeachAssignment ta
+JOIN Subject s ON ta.SubjCode = s.SubjCode
+JOIN Teacher t ON ta.TID = t.TID;
+
+-- 4. View สำหรับหน้า Registration (รายวิชาที่นักศึกษาลงทะเบียนแล้ว)
+CREATE OR REPLACE VIEW v_student_registered_courses AS
+SELECT sr.UserID, sr.StuRegisID, ta.TAssignID, s.SubjCode, s.SubjName, s.SubjCredit,
+       ta.StudyDay, ta.StartTime, ta.EndTime, sr.StuRegisStatus
+FROM StudyRegister sr
+JOIN TeachAssignment ta ON sr.TAssignID = ta.TAssignID
+JOIN Subject s ON ta.SubjCode = s.SubjCode;
+
+-- 5. View สำหรับหน้า Evaluation (ประวัติการประเมินที่ทำเสร็จแล้ว)
+CREATE OR REPLACE VIEW v_student_completed_reviews AS
+SELECT rt.UserID, rt.TeachReview, rt.UserRateT, rt.UserReviewT, sa.AssName, s.SubjName, 
+       CONCAT(t.TFName, ' ', t.TLName) AS TeacherName
+FROM ReviewTeacher rt
+JOIN StdAssignment sa ON rt.AssignID = sa.AssignID
+JOIN Subject s ON sa.SubjCode = s.SubjCode
+JOIN TeachAssignment ta ON s.SubjCode = ta.SubjCode
+JOIN Teacher t ON ta.TID = t.TID;
