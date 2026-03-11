@@ -1,0 +1,34 @@
+        body { background: #EEECE9; font-family: 'DM Sans', sans-serif; color: #1A1916; }
+        .page-header { background: #F7F6F4; border-bottom: 1px solid #DDDBD7; padding: 32px 40px 28px; }
+        .page-header h1 { font-size: 18px; font-weight: 500; }
+        .page-header p  { font-size: 12.5px; color: #9B9790; margin: 4px 0 0; font-weight: 300; }
+        .content-wrap { padding: 32px 40px; }
+        .panel { background: #F7F6F4; border: 1px solid #DDDBD7; }
+        .panel-head { padding: 16px 20px; border-bottom: 1px solid #DDDBD7; font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; color: #9B9790; }
+
+        /* Course rows */
+        .course-item { padding: 16px 20px; border-bottom: 1px solid #DDDBD7; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; transition: background 0.15s; }
+        .course-item:last-child { border-bottom: none; }
+        .course-item:hover { background: rgba(0,0,0,0.02); }
+        .course-code { font-family: 'DM Mono', monospace; font-size: 12px; color: #9B9790; margin-bottom: 3px; }
+        .course-name { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+        .course-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+        .meta-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.07em; background: #E8E6E1; color: #5A5752; padding: 3px 8px; }
+
+        .btn-office { font-size: 11.5px; padding: 7px 16px; border: 1px solid #DDDBD7; background: #F7F6F4; color: #1A1916; letter-spacing: 0.03em; cursor: pointer; transition: background 0.15s; font-family: 'DM Sans', sans-serif; flex-shrink: 0; }
+        .btn-office:hover { background: #EEECE9; }
+        .btn-office-dark { background: #1A1916; color: #F7F6F4; border-color: #1A1916; }
+        .btn-office-dark:hover { background: #2E2C29; color: #F7F6F4; }
+
+        /* Credit summary */
+        .credit-bar { padding: 16px 20px; border-bottom: 1px solid #DDDBD7; display: flex; justify-content: space-between; align-items: center; }
+        .credit-label { font-size: 12.5px; color: #5A5752; }
+        .credit-value { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; }
+
+        /* My course items */
+        .my-course-item { padding: 12px 20px; border-bottom: 1px solid #DDDBD7; display: flex; justify-content: space-between; align-items: center; }
+        .my-course-item:last-child { border-bottom: none; }
+        .my-course-code { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; }
+        .my-course-name { font-size: 11.5px; color: #9B9790; margin-top: 1px; }
+        .btn-remove { background: none; border: none; color: #9B9790; font-size: 13px; cursor: pointer; padding: 0; transition: color 0.15s; }
+        .btn-remove:hover { color: #1A1916; }

@@ -1,49 +1,258 @@
-<div class="sidebar p-3" style="width: 280px; min-height: 100vh; background: #0d1b2a; color: white; position: fixed;">
-    <h4 class="text-center py-3">UMS PORTAL</h4>
-    <hr>
-    <ul class="nav nav-pills flex-column mb-auto">
-        <li class="nav-item">
-            <a href="/" class="nav-link <%= page === 'dashboard' ? 'active' : 'text-white' %>">
-                <i class="bi bi-house-door me-2"></i> แผงควบคุม (Dashboard)
-            </a>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #EBEBEB;
+      display: flex;
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 260px;
+      min-height: 100vh;
+      background: #F7F6F4;
+      border-right: 1px solid #DDDBD7;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      position: relative;
+    }
+
+    /* subtle vertical rule texture */
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to right,
+        transparent,
+        transparent 31px,
+        rgba(0,0,0,0.025) 31px,
+        rgba(0,0,0,0.025) 32px
+      );
+      pointer-events: none;
+    }
+
+    /* ── LOGO ── */
+    .sidebar-logo {
+      padding: 36px 28px 28px;
+      border-bottom: 1px solid #DDDBD7;
+    }
+
+    .logo-mark {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      color: #1A1916;
+      line-height: 1.3;
+      text-transform: uppercase;
+    }
+
+    .logo-sub {
+      font-size: 10.5px;
+      color: #9B9790;
+      letter-spacing: 0.04em;
+      margin-top: 6px;
+      font-weight: 300;
+    }
+
+    /* ── NAV ── */
+    .sidebar-nav {
+      flex: 1;
+      padding: 20px 0 16px;
+      overflow-y: auto;
+    }
+
+    .sidebar-section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9.5px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #B0ADA8;
+      padding: 18px 28px 8px;
+      font-weight: 400;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 28px;
+      font-size: 13.5px;
+      font-weight: 400;
+      color: #5A5752;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      border-left: 2px solid transparent;
+      transition: all 0.18s ease;
+      position: relative;
+    }
+
+    .nav-item i {
+      font-size: 15px;
+      opacity: 0.7;
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+      transition: opacity 0.18s;
+    }
+
+    .nav-item:hover {
+      color: #1A1916;
+      background: rgba(0,0,0,0.03);
+      border-left-color: #C5C2BC;
+    }
+
+    .nav-item:hover i { opacity: 1; }
+
+    .nav-item.active {
+      color: #1A1916;
+      font-weight: 500;
+      background: rgba(0,0,0,0.045);
+      border-left: 2px solid #1A1916;
+    }
+
+    .nav-item.active i { opacity: 1; }
+
+    /* ── FOOTER / USER ── */
+    .sidebar-footer {
+      padding: 16px 20px 24px;
+      border-top: 1px solid #DDDBD7;
+    }
+
+    .sidebar-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 2px;
+      transition: background 0.18s;
+      cursor: pointer;
+    }
+
+    .sidebar-user:hover { background: rgba(0,0,0,0.04); }
+
+    .user-avatar img {
+      border-radius: 2px;
+      display: block;
+      filter: grayscale(20%);
+      border: 1px solid #DDDBD7;
+    }
+
+    .user-name {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #1A1916;
+      letter-spacing: 0.01em;
+    }
+
+    .user-role {
+      font-size: 11px;
+      color: #9B9790;
+      margin-top: 2px;
+      font-weight: 300;
+      letter-spacing: 0.03em;
+    }
+
+    /* dropdown overrides */
+    .dropdown-menu {
+      background: #F7F6F4;
+      border: 1px solid #DDDBD7 !important;
+      border-radius: 0 !important;
+      font-size: 13px !important;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important;
+    }
+
+    .dropdown-item {
+      color: #1A1916 !important;
+      letter-spacing: 0.01em;
+      transition: background 0.15s;
+    }
+
+    .dropdown-item:hover { background: rgba(0,0,0,0.05) !important; }
+    .dropdown-divider { border-color: #DDDBD7 !important; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">UMS<br>PORTAL</div>
+    <div class="logo-sub">University Management System</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="sidebar-section-label">หลัก</div>
+
+    <a href="/" class="nav-item active">
+      <i class="bi bi-house-door"></i> แผงควบคุม
+    </a>
+    <a href="/academic" class="nav-item">
+      <i class="bi bi-calendar3"></i> ตารางเรียนและหลักสูตร
+    </a>
+    <a href="/registration" class="nav-item">
+      <i class="bi bi-pencil-square"></i> ลงทะเบียนเรียน
+    </a>
+    <a href="/lms" class="nav-item">
+      <i class="bi bi-book"></i> จัดการเรียน (LMS)
+    </a>
+
+    <div class="sidebar-section-label">นักศึกษา</div>
+
+    <a href="/events" class="nav-item">
+      <i class="bi bi-trophy"></i> กิจกรรม
+    </a>
+    <a href="/evaluation" class="nav-item">
+      <i class="bi bi-star"></i> ประเมินอาจารย์
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user dropdown">
+      <a href="#"
+         class="sidebar-user text-decoration-none"
+         data-bs-toggle="dropdown"
+         aria-expanded="false">
+        <div class="user-avatar">
+          <img src="https://ui-avatars.com/api/?name=Student+User&background=E8E6E1&color=1A1916&size=64"
+               width="36" height="36">
+        </div>
+        <div>
+          <div class="user-name">ข้อมูลผู้ใช้ <i class="bi bi-chevron-up" style="font-size:9px; opacity:0.4;"></i></div>
+          <div class="user-role">นักศึกษา</div>
+        </div>
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end mb-2 shadow-sm"
+          style="min-width:180px;">
+        <li>
+          <a class="dropdown-item py-2" href="#">
+            <i class="bi bi-person me-2 text-muted"></i> โปรไฟล์
+          </a>
         </li>
         <li>
-            <a href="/academic" class="nav-link <%= page === 'academic' ? 'active' : 'text-white' %>">
-                <i class="bi bi-calendar3 me-2"></i> ตารางเรียนและหลักสูตร
-            </a>
+          <a class="dropdown-item py-2" href="/settings">
+            <i class="bi bi-gear me-2 text-muted"></i> ตั้งค่า
+          </a>
         </li>
+        <li><hr class="dropdown-divider"></li>
         <li>
-            <a href="/registration" class="nav-link <%= page === 'registration' ? 'active' : 'text-white' %>">
-                <i class="bi bi-pencil-square me-2"></i> ลงทะเบียนเรียน
-            </a>
+          <a class="dropdown-item py-2" href="/login" style="color:#888 !important;">
+            <i class="bi bi-box-arrow-right me-2"></i> ออกจากระบบ
+          </a>
         </li>
-        <li>
-            <a href="/lms" class="nav-link <%= page === 'lms' ? 'active' : 'text-white' %>">
-                <i class="bi bi-book me-2"></i> จัดการเรียน (LMS)
-            </a>
-        </li>
-        <li>
-            <a href="/events" class="nav-link <%= page === 'events' ? 'active' : 'text-white' %>">
-                <i class="bi bi-trophy me-2"></i> กิจกรรม (Events)
-            </a>
-        </li>
-        <li>
-            <a href="/evaluation" class="nav-link <%= page === 'evaluation' ? 'active' : 'text-white' %>">
-                <i class="bi bi-star me-2"></i> ประเมินอาจารย์
-            </a>
-        </li>
-    </ul>
-    <hr>
-    <div class="dropdown mt-auto">
-        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-            <img src="https://ui-avatars.com/api/?name=Student+User" width="32" height="32" class="rounded-circle me-2">
-            <strong>ข้อมูลผู้ใช้</strong>
-        </a>
-        <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-            <li><a class="dropdown-item" href="#">โปรไฟล์</a></li>
-            <li><a class="dropdown-item" href="settings">ตั้งค่า</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="login">ออกจากระบบ</a></li>
-        </ul>
+      </ul>
     </div>
-</div>
+  </div>
+</aside>
+
+</body>
+</html>

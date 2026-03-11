@@ -1,0 +1,29 @@
+        body { background: #EEECE9; font-family: 'DM Sans', sans-serif; color: #1A1916; }
+        .page-header { background: #F7F6F4; border-bottom: 1px solid #DDDBD7; padding: 32px 40px 28px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .page-header h1 { font-size: 18px; font-weight: 500; }
+        .student-tag { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; background: #E8E6E1; color: #5A5752; padding: 4px 10px; }
+        .content-wrap { padding: 32px 40px; }
+        .panel { background: #F7F6F4; border: 1px solid #DDDBD7; }
+        .panel-head { padding: 16px 20px; border-bottom: 1px solid #DDDBD7; font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; color: #9B9790; }
+
+        /* Assignment items */
+        .assign-item { padding: 16px 20px; border-bottom: 1px solid #DDDBD7; border-left: 2px solid #DDDBD7; display: flex; justify-content: space-between; align-items: center; }
+        .assign-item.submitted { border-left-color: #1A1916; }
+        .assign-item:last-child { border-bottom: none; }
+        .assign-name { font-size: 13.5px; font-weight: 500; margin-bottom: 3px; }
+        .assign-sub  { font-size: 12px; color: #9B9790; }
+        .assign-due  { font-family: 'DM Mono', monospace; font-size: 10.5px; color: #9B9790; margin-top: 3px; }
+        .status-tag  { font-family: 'DM Mono', monospace; font-size: 9.5px; letter-spacing: 0.08em; background: #E8E6E1; color: #5A5752; padding: 3px 8px; }
+        .status-tag.done { background: #1A1916; color: #F7F6F4; }
+
+        .btn-office { font-size: 11.5px; padding: 6px 14px; border: 1px solid #DDDBD7; background: #F7F6F4; color: #1A1916; letter-spacing: 0.03em; cursor: pointer; transition: background 0.15s; font-family: 'DM Sans', sans-serif; }
+        .btn-office:hover { background: #EEECE9; }
+        .btn-office-dark { background: #1A1916; color: #F7F6F4; border-color: #1A1916; }
+        .btn-office-dark:hover { background: #2E2C29; color: #F7F6F4; }
+
+        /* Grade table */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .data-table th { padding: 11px 16px; font-size: 10.5px; font-family: 'DM Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: #9B9790; font-weight: 400; border-bottom: 1px solid #DDDBD7; }
+        .data-table td { padding: 12px 16px; border-bottom: 1px solid #DDDBD7; vertical-align: middle; }
+        .data-table tr:last-child td { border-bottom: none; }
+        .grade-box { width: 36px; height: 36px; background: #1A1916; color: #F7F6F4; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; }

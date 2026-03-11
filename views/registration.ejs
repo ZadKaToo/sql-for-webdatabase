@@ -5,104 +5,92 @@
     <title>ลงทะเบียนเรียน | UMS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <style>
-        body { background-color: #f0f2f5; font-family: 'Sarabun', sans-serif; }
-        .top-navbar { background: #1a237e; color: white; padding: 15px 0; }
-        .course-card { background: white; border: 1px solid #e0e0e0; border-radius: 8px; transition: 0.2s; }
-        .course-card:hover { border-color: #1a237e; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .my-schedule-box { background: #ffffff; border-radius: 10px; padding: 20px; position: sticky; top: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/registra.css">
 </head>
 <body>
-
 <div class="d-flex">
     <%- include('partials/sidebar') %>
+    <div class="w-100" style="margin-left: 260px;">
 
-    <div class="main-content w-100" style="margin-left: 280px;">
-        
-        <div class="top-navbar mb-4 shadow-sm">
-            <div class="container d-flex justify-content-between align-items-center">
-                <h4 class="m-0">📚 ระบบลงทะเบียนเรียน (Course Registration)</h4>
-            </div>
+        <div class="page-header">
+            <h1>Course Registration</h1>
+            <p>ระบบลงทะเบียนเรียน</p>
         </div>
 
-        <div class="container mb-5">
-            <div class="row">
-                <div class="col-lg-8">
-                    <% availableCourses.forEach(course => { %>
-                        <div class="course-card p-3 mb-3">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h5 class="mb-1 text-primary fw-bold"><%= course.SubjCode %> : <%= course.SubjName %></h5>
-                                    <p class="mb-1 small text-muted">
-                                        👨‍🏫 อาจารย์: <%= course.TeacherName %> | 🏫 ห้อง: <%= course.Room %>
-                                    </p>
-                                    <div class="mt-2">
-                                        <span class="badge bg-light text-dark border">
-                                            🕒 <%= course.StudyDay %> | <%= course.StartTime %> - <%= course.EndTime %>
-                                        </span>
-                                        <span class="badge bg-info text-dark ms-2"><%= course.SubjCredit %> หน่วยกิต</span>
-                                        
-                                        <% 
-                                            // หาว่าวิชานี้มีงานกี่ชิ้น จากตัวแปร workloads
-                                            let subjWorkload = workloads.find(w => w.SubjCode === course.SubjCode);
-                                            let taskCount = subjWorkload ? subjWorkload.TotalAssignments : 0;
-                                        %>
-                                        <span class="badge bg-warning text-dark ms-2" title="จำนวนงานที่ต้องทำในวิชานี้">
-                                            <i class="bi bi-journal-text"></i> งาน <%= taskCount %> ชิ้น
-                                        </span>
-                                    </div>
-                                </div>
-                                <form action="/add-course" method="POST">
-                                    <input type="hidden" name="tAssignID" value="<%= course.TAssignID %>">
-                                    <button type="submit" class="btn btn-outline-primary btn-sm">
-                                        <i class="bi bi-plus-circle"></i> เพิ่มวิชา
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    <% }) %>
-                    
-                    <% if(availableCourses.length === 0) { %>
-                        <div class="alert alert-info text-center">ไม่มีรายวิชาที่เปิดสอน หรือคุณลงทะเบียนครบแล้ว</div>
-                    <% } %>
-                </div>
+        <div class="content-wrap">
+            <div class="row g-4">
 
-                <div class="col-lg-4">
-                    <div class="my-schedule-box border-top border-4 border-success">
-                        <h5 class="fw-bold mb-3">🛒 รายวิชาของฉัน</h5>
-                        <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
-                            <span>หน่วยกิตรวม</span>
-                            <span class="badge bg-success fs-5"><%= totalCredits %> / 22</span>
-                        </div>
-                        <div class="list-group list-group-flush mb-3">
-                            <% myCourses.forEach(my => { %>
-                                <div class="list-group-item px-0 py-2">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <strong><%= my.SubjCode %></strong>
-                                        <form action="/remove-course" method="POST" class="m-0">
-                                            <input type="hidden" name="stuRegisID" value="<%= my.StuRegisID %>">
-                                            <button type="submit" class="btn btn-link text-danger p-0" title="ถอนรายวิชา">✖</button>
-                                        </form>
+                <!-- Available courses -->
+                <div class="col-lg-8">
+                    <div class="panel">
+                        <div class="panel-head">รายวิชาที่เปิดสอน</div>
+                        <% if(availableCourses.length > 0) { %>
+                            <% availableCourses.forEach(course => { %>
+                                <div class="course-item">
+                                    <div>
+                                        <div class="course-code"><%= course.SubjCode %></div>
+                                        <div class="course-name"><%= course.SubjName %></div>
+                                        <div class="course-meta">
+                                            <span class="meta-tag"><i class="bi bi-person"></i> <%= course.TeacherName %></span>
+                                            <span class="meta-tag"><i class="bi bi-geo"></i> <%= course.Room %></span>
+                                            <span class="meta-tag"><%= course.StudyDay %> <%= course.StartTime %>–<%= course.EndTime %></span>
+                                            <span class="meta-tag"><%= course.SubjCredit %> หน่วยกิต</span>
+                                            <% let subjWorkload = workloads.find(w => w.SubjCode === course.SubjCode); %>
+                                            <% let taskCount = subjWorkload ? subjWorkload.TotalAssignments : 0; %>
+                                            <span class="meta-tag">งาน <%= taskCount %> ชิ้น</span>
+                                        </div>
                                     </div>
-                                    <small class="text-muted text-truncate d-block"><%= my.SubjName %></small>
-                                    <span class="badge bg-secondary mt-1"><%= my.StudyDay %></span>
+                                    <form action="/add-course" method="POST">
+                                        <input type="hidden" name="tAssignID" value="<%= course.TAssignID %>">
+                                        <button type="submit" class="btn-office">+ เพิ่มวิชา</button>
+                                    </form>
                                 </div>
                             <% }) %>
-                            
-                            <% if(myCourses.length === 0) { %>
-                                <div class="text-center text-muted small py-2">ยังไม่ได้ลงทะเบียนรายวิชาใดๆ</div>
-                            <% } %>
-                        </div>
-                        <button class="btn btn-success w-100 fw-bold">ยืนยันการลงทะเบียน</button>
+                        <% } else { %>
+                            <div style="padding:32px; text-align:center; font-size:13px; color:#9B9790;">ไม่มีรายวิชาที่เปิดสอน หรือลงทะเบียนครบแล้ว</div>
+                        <% } %>
                     </div>
                 </div>
+
+                <!-- My courses -->
+                <div class="col-lg-4">
+                    <div class="panel" style="position:sticky; top:20px;">
+                        <div class="panel-head">รายวิชาของฉัน</div>
+
+                        <div class="credit-bar">
+                            <span class="credit-label">หน่วยกิตรวม</span>
+                            <span class="credit-value"><%= totalCredits %> / 22</span>
+                        </div>
+
+                        <% if(myCourses.length > 0) { %>
+                            <% myCourses.forEach(my => { %>
+                                <div class="my-course-item">
+                                    <div>
+                                        <div class="my-course-code"><%= my.SubjCode %></div>
+                                        <div class="my-course-name"><%= my.SubjName %></div>
+                                        <div style="margin-top:4px;"><span style="font-family:'DM Mono',monospace; font-size:9.5px; background:#E8E6E1; color:#5A5752; padding:2px 7px;"><%= my.StudyDay %></span></div>
+                                    </div>
+                                    <form action="/remove-course" method="POST">
+                                        <input type="hidden" name="stuRegisID" value="<%= my.StuRegisID %>">
+                                        <button type="submit" class="btn-remove"><i class="bi bi-x"></i></button>
+                                    </form>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <div style="padding:28px; text-align:center; font-size:13px; color:#9B9790;">ยังไม่ได้ลงทะเบียนวิชาใดๆ</div>
+                        <% } %>
+
+                        <div style="padding:16px 20px; border-top:1px solid #DDDBD7;">
+                            <button class="btn-office btn-office-dark" style="width:100%;">ยืนยันการลงทะเบียน</button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
-
     </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

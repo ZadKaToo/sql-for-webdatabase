@@ -5,72 +5,87 @@
     <title>ประเมินอาจารย์ | UMS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <style>
-        body { background-color: #f8f9fa; font-family: 'Sarabun', sans-serif; }
-        .star-rating i { color: #ffc107; font-size: 1.2rem; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/eva.css">
 </head>
 <body>
 
 <div class="d-flex">
     <%- include('partials/sidebar') %>
 
-    <div class="main-content w-100" style="margin-left: 280px; padding: 30px;">
-        <h3 class="fw-bold mb-4">⭐ ระบบประเมินอาจารย์ผู้สอน</h3>
+    <div class="w-100" style="margin-left: 260px;">
 
-        <div class="row">
-            <div class="col-lg-7 mb-4">
-                <div class="card p-4 shadow-sm">
-                    <h5 class="mb-3">📝 ทำแบบประเมิน</h5>
-                    <form action="/submit-evaluation" method="POST">
-                        <div class="mb-3">
-                            <label class="form-label">เลือกวิชา / อาจารย์ที่ต้องการประเมิน</label>
-                            <select class="form-select" name="assignID" required>
-                                <option value="">-- กรุณาเลือก --</option>
-                                <% pendingReviews.forEach(pr => { %>
-                                    <option value="<%= pr.AssignID %>">
-                                        วิชา: <%= pr.SubjName %> | งาน: <%= pr.AssName %> (อ.<%= pr.TeacherName %>)
-                                    </option>
-                                <% }) %>
-                                <% if(pendingReviews.length === 0) { %>
-                                    <option value="" disabled>ไม่มีรายการที่ต้องประเมิน</option>
-                                <% } %>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">ให้คะแนน (1-5 ดาว)</label>
-                            <input type="number" class="form-control" name="rating" min="1" max="5" placeholder="เช่น 4" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">ข้อเสนอแนะเพิ่มเติม</label>
-                            <textarea class="form-control" name="comment" rows="3"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">ส่งผลการประเมิน</button>
-                    </form>
-                </div>
-            </div>
+        <div class="page-header">
+            <h1>Teacher Evaluation</h1>
+            <p>ระบบประเมินอาจารย์ผู้สอน</p>
+        </div>
 
-            <div class="col-lg-5">
-                <div class="card p-4 shadow-sm border-top border-4 border-warning">
-                    <h5 class="mb-3">🏆 สรุปคะแนนประเมินอาจารย์</h5>
-                    <div class="list-group list-group-flush">
-                        <% teacherReviews.forEach(teacher => { %>
-                            <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-0 fw-bold"><%= teacher.TFName %> <%= teacher.TLName %></h6>
-                                    <small class="text-muted">รีวิวทั้งหมด: <%= teacher.TotalReviews %> รายการ</small>
-                                </div>
-                                <div class="text-end star-rating">
-                                    <h5 class="mb-0"><%= teacher.AvgRating %> <i class="bi bi-star-fill"></i></h5>
-                                </div>
+        <div class="content-wrap">
+            <div class="row g-4">
+
+                <!-- Form -->
+                <div class="col-lg-7">
+                    <div class="panel">
+                        <div class="panel-head">ทำแบบประเมิน</div>
+
+                        <form action="/submit-evaluation" method="POST">
+                            <div class="field">
+                                <label>วิชา / อาจารย์</label>
+                                <select name="assignID" required>
+                                    <option value="">-- กรุณาเลือก --</option>
+                                    <% pendingReviews.forEach(pr => { %>
+                                        <option value="<%= pr.AssignID %>">
+                                            <%= pr.SubjName %> — <%= pr.AssName %> (อ.<%= pr.TeacherName %>)
+                                        </option>
+                                    <% }) %>
+                                    <% if(pendingReviews.length === 0) { %>
+                                        <option disabled>ไม่มีรายการที่ต้องประเมิน</option>
+                                    <% } %>
+                                </select>
                             </div>
-                        <% }) %>
 
-                        <% if(teacherReviews.length === 0) { %>
-                            <div class="text-center text-muted py-3">ยังไม่มีข้อมูลการประเมิน</div>
+                            <div class="field" style="margin-top:16px;">
+                                <label>คะแนน (1–5)</label>
+                                <input type="number" name="rating" min="1" max="5" placeholder="เช่น 4" required>
+                            </div>
+
+                            <div class="field" style="margin-top:16px;">
+                                <label>ข้อเสนอแนะ</label>
+                                <textarea name="comment"></textarea>
+                            </div>
+
+                            <div class="form-footer">
+                                <button type="submit" class="btn-office-dark">ส่งผลการประเมิน</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Leaderboard -->
+                <div class="col-lg-5">
+                    <div class="panel">
+                        <div class="panel-head">สรุปคะแนนอาจารย์</div>
+
+                        <% if(teacherReviews.length > 0) { %>
+                            <% teacherReviews.forEach(teacher => { %>
+                                <div class="teacher-item">
+                                    <div>
+                                        <div class="name"><%= teacher.TFName %> <%= teacher.TLName %></div>
+                                        <div class="reviews"><%= teacher.TotalReviews %> รีวิว</div>
+                                    </div>
+                                    <div class="rating-badge">
+                                        <%= teacher.AvgRating %> <i class="bi bi-star-fill"></i>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <div style="padding:32px 20px; text-align:center; font-size:13px; color:#9B9790;">
+                                ยังไม่มีข้อมูลการประเมิน
+                            </div>
                         <% } %>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>

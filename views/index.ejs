@@ -2,111 +2,103 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>ระบบสารสนเทศนักศึกษา | Student Information System</title>
+    <title>แผงควบคุม | UMS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <style>
-        body { background-color: #f8f9fa; font-family: 'Sarabun', sans-serif; }
-        /* ลบ CSS ของ sidebar เดิมออก เพราะเราจะใช้จาก partial แทน */
-        .card { border: none; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); transition: 0.3s; }
-        .card:hover { transform: translateY(-5px); }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/ind.css">
 </head>
 <body>
-
 <div class="d-flex">
     <%- include('partials/sidebar') %>
+    <div class="w-100" style="margin-left: 260px;">
 
-    <div class="main-content w-100" style="margin-left: 280px; padding: 30px;">
-        <div class="container-fluid">
-            <header class="d-flex justify-content-between align-items-center mb-4">
-                <h3>ยินดีต้อนรับสู่ระบบบริหารการศึกษา</h3>
-                <span class="text-muted">ภาคเรียนที่ 1/2569</span>
-            </header>
+        <div class="page-header">
+            <h1>ยินดีต้อนรับสู่ระบบบริหารการศึกษา</h1>
+            <span class="semester">ภาคเรียนที่ 1/2569</span>
+        </div>
 
-            <div class="row mb-4">
+        <div class="content-wrap">
+            <!-- Stats row -->
+            <div class="row g-3 mb-4">
                 <div class="col-md-3">
-                    <div class="card p-3 bg-white text-dark">
-                        <h6>เกรดเฉลี่ยสะสม (GPAX)</h6>
-                        <h2 class="text-primary"><%= gpa[0] ? gpa[0].GPAX : '0.00' %></h2>
+                    <div class="stat-card">
+                        <div class="label">GPAX</div>
+                        <div class="value"><%= gpa[0] ? gpa[0].GPAX : '0.00' %></div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card p-3 bg-white text-dark">
-                        <h6>หน่วยกิตที่ลงทะเบียน</h6>
-                        <h2 class="text-success"><%= credits[0] ? credits[0].TotalEnrolledCredits : '0' %></h2>
+                    <div class="stat-card">
+                        <div class="label">หน่วยกิต</div>
+                        <div class="value"><%= credits[0] ? credits[0].TotalEnrolledCredits : '0' %></div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card p-3 bg-white text-dark">
-                        <h6>งานที่ยังไม่ได้ส่ง</h6>
-                        <h2 class="text-danger"><%= pending.length %></h2>
+                    <div class="stat-card">
+                        <div class="label">งานค้างส่ง</div>
+                        <div class="value"><%= pending.length %></div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card p-3 bg-white text-dark">
-                        <h6>กิจกรรมที่จะถึง</h6>
-                        <h2 class="text-warning">2</h2>
+                    <div class="stat-card">
+                        <div class="label">กิจกรรมที่จะถึง</div>
+                        <div class="value">2</div>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row g-4">
+
+                <!-- Notifications -->
                 <div class="col-md-7">
-                    <div class="card p-4">
-                        <h5 class="mb-3 border-bottom pb-2">🔔 ประกาศและการแจ้งเตือนล่าสุด</h5>
-                        <div class="list-group list-group-flush">
-                            <% dashboard.forEach(item => { %>
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>[<%= item.Type %>]</strong> <%= item.Notification %>
-                                    </div>
-                                    <small class="text-muted"><%= new Date(item.NotiDate).toLocaleDateString('th-TH') %></small>
+                    <div class="panel">
+                        <div class="panel-head">ประกาศและการแจ้งเตือน</div>
+                        <% dashboard.forEach(item => { %>
+                            <div class="notif-item">
+                                <div>
+                                    <span class="notif-type"><%= item.Type %></span>
+                                    <%= item.Notification %>
                                 </div>
-                            <% }) %>
-                        </div>
+                                <span class="notif-date"><%= new Date(item.NotiDate).toLocaleDateString('th-TH') %></span>
+                            </div>
+                        <% }) %>
                     </div>
                 </div>
 
+                <!-- Faculty stats -->
                 <div class="col-md-5">
-                    <div class="card p-4 mt-4 shadow-sm border-top border-4 border-primary">
-                        <h5 class="mb-3 border-bottom pb-2"><i class="bi bi-bar-chart-fill text-primary"></i> 📊 สถิตินักศึกษา (รายคณะ)</h5>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-hover align-middle">
-                                <thead class="table-light text-muted">
-                                    <tr>
-                                        <th>ชื่อคณะ</th>
-                                        <th class="text-end">จำนวน (คน)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                    <div class="panel">
+                        <div class="panel-head">สถิตินักศึกษา รายคณะ</div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>คณะ</th>
+                                    <th style="text-align:right;">จำนวน</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if(facultyStats.length > 0) { %>
                                     <% facultyStats.forEach(stat => { %>
                                         <tr>
                                             <td>
-                                                <strong><%= stat.FCode %></strong><br>
-                                                <small class="text-muted"><%= stat.FNameENG %></small>
+                                                <div style="font-weight:500; font-size:13px;"><%= stat.FCode %></div>
+                                                <div style="font-size:11px; color:#9B9790;"><%= stat.FNameENG %></div>
                                             </td>
-                                            <td class="text-end">
-                                                <span class="badge bg-primary rounded-pill"><%= stat.TotalStudents %></span>
-                                            </td>
+                                            <td style="text-align:right;"><span class="count-tag"><%= stat.TotalStudents %></span></td>
                                         </tr>
                                     <% }) %>
-
-                                    <% if(facultyStats.length === 0) { %>
-                                        <tr>
-                                            <td colspan="2" class="text-center text-muted py-3">ยังไม่มีข้อมูลสถิติ</td>
-                                        </tr>
-                                    <% } %>
-                                </tbody>
-                            </table>
-                        </div>
+                                <% } else { %>
+                                    <tr><td colspan="2" style="text-align:center; color:#9B9790; padding:28px;">ยังไม่มีข้อมูล</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

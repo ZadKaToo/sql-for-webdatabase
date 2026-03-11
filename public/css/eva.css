@@ -1,0 +1,83 @@
+        body { background: #EEECE9; font-family: 'DM Sans', sans-serif; color: #1A1916; }
+
+        .page-header { background: #F7F6F4; border-bottom: 1px solid #DDDBD7; padding: 32px 40px 28px; }
+        .page-header h1 { font-size: 18px; font-weight: 500; letter-spacing: 0.01em; }
+        .page-header p  { font-size: 12.5px; color: #9B9790; margin: 4px 0 0; font-weight: 300; }
+
+        .content-wrap { padding: 32px 40px; }
+
+        .panel { background: #F7F6F4; border: 1px solid #DDDBD7; }
+
+        .panel-head {
+            padding: 16px 20px;
+            border-bottom: 1px solid #DDDBD7;
+            font-size: 11px;
+            font-family: 'DM Mono', monospace;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #9B9790;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Form */
+        .field { padding: 20px 20px 0; }
+        .field label { font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: #9B9790; display: block; margin-bottom: 7px; }
+
+        .field select,
+        .field input,
+        .field textarea {
+            width: 100%;
+            background: #EEECE9;
+            border: 1px solid #DDDBD7;
+            border-radius: 0;
+            padding: 9px 12px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            color: #1A1916;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .field select:focus,
+        .field input:focus,
+        .field textarea:focus { border-color: #1A1916; }
+        .field textarea { resize: vertical; min-height: 90px; }
+
+        .form-footer { padding: 20px; }
+
+        .btn-office-dark {
+            width: 100%;
+            background: #1A1916;
+            color: #F7F6F4;
+            border: 1px solid #1A1916;
+            padding: 10px;
+            font-size: 13px;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .btn-office-dark:hover { background: #2E2C29; }
+
+        /* Leaderboard */
+        .teacher-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #DDDBD7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .teacher-item:last-child { border-bottom: none; }
+        .teacher-item .name { font-size: 13.5px; font-weight: 500; }
+        .teacher-item .reviews { font-size: 11px; color: #9B9790; margin-top: 2px; }
+        .rating-badge {
+            font-family: 'DM Mono', monospace;
+            font-size: 15px;
+            font-weight: 500;
+            color: #1A1916;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .rating-badge i { font-size: 11px; color: #9B9790; }
