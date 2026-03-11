@@ -1,0 +1,8 @@
+v_student_credits
+v_subject_workload
+v_teacher_reviews
+v_faculty_stats
+v_student_dashboard
+student_pending_assignments
+v_student_gpa
+student_daily_schedule
