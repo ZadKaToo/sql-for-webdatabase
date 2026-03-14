@@ -53,6 +53,51 @@ app.get('/admin/add-event', requireLogin, (req, res) => {
     res.render('admin-add-event', { success: isSuccess, page: 'events', user: req.session.user });
 });
 
+// ==========================================
+// Route สำหรับรับค่าเมื่อกด "+ ลงทะเบียน" กิจกรรม
+// ==========================================
+app.post('/register-event', requireLogin, async (req, res) => {
+    try {
+        const userId = req.session.user.UserID;
+        const { eventId } = req.body;
+        
+        // สร้าง RegID แบบสุ่ม เช่น R123456789 (ต้องไม่เกิน 10 ตัวอักษรตาม Schema)
+        const regId = 'R' + Math.floor(100000000 + Math.random() * 900000000).toString(); 
+
+        // บันทึกลงตาราง Register
+        await pool.query(
+            `INSERT INTO Register (RegID, UserID, EventID) VALUES (?, ?, ?)`, 
+            [regId, userId, eventId]
+        );
+        
+        res.redirect('/events?status=registered');
+    } catch (err) {
+        console.error("Event Register Error:", err);
+        res.redirect('/events?status=error');
+    }
+});
+
+// ==========================================
+// Route สำหรับรับค่าเมื่อกด "ยกเลิก" การลงทะเบียน
+// ==========================================
+app.post('/cancel-event', requireLogin, async (req, res) => {
+    try {
+        const userId = req.session.user.UserID;
+        const { eventId } = req.body;
+
+        // ลบข้อมูลออกจากตาราง Register
+        await pool.query(
+            `DELETE FROM Register WHERE UserID = ? AND EventID = ?`, 
+            [userId, eventId]
+        );
+        
+        res.redirect('/events?status=canceled');
+    } catch (err) {
+        console.error("Event Cancel Error:", err);
+        res.redirect('/events?status=error');
+    }
+});
+
 app.post('/admin/add-event', requireLogin, async (req, res) => {
     // เช็คสิทธิ์แอดมิน
     if (req.session.user.UserType !== 'ADMIN') {
@@ -184,17 +229,24 @@ app.post('/add-course', requireLogin, async (req, res) => {
         const userId = req.session.user.UserID;
         const { tAssignID } = req.body;
 
-        // เช็คก่อนว่ากดยืนยัน (ล็อค) ไปหรือยัง เผื่อคนแอบยิง API เข้ามา
+        // เช็คว่ากดยืนยันหรือยัง
         const [statusRows] = await pool.query('SELECT Status FROM RegistrationStatus WHERE UserID = ?', [userId]);
         if (statusRows.length > 0 && statusRows[0].Status === 'CONFIRMED') {
             return res.redirect('/registration?status=locked');
         }
 
-        // บันทึกลงตาราง StudyRegister 
-        // (สมมติว่าตารางนี้มีแค่ UserID กับ TAssignID ถ้ามีคอลัมน์อื่นที่จำเป็นต้องใส่แจ้งได้นะครับ)
+        // 🌟 แก้ไข: หา StuRegisID ล่าสุดแล้ว +1 (เพราะตารางของคุณเป็น INT แบบไม่ได้ตั้ง Auto Increment)
+        const [maxIdRows] = await pool.query('SELECT MAX(StuRegisID) as maxId FROM StudyRegister');
+        let newStuRegisID = 501; // ค่าเริ่มต้นถ้าตารางยังว่างอยู่ (อิงจาก mock data ของคุณ)
+        
+        if (maxIdRows[0].maxId) {
+            newStuRegisID = maxIdRows[0].maxId + 1;
+        }
+
+        // 🌟 แก้ไข: เพิ่ม Section เป็น 1 และ สถานะเป็น 'ENROLLED' ตามโครงสร้างฐานข้อมูล
         await pool.query(
-            `INSERT INTO StudyRegister (UserID, TAssignID) VALUES (?, ?)`, 
-            [userId, tAssignID]
+            `INSERT INTO StudyRegister (StuRegisID, TAssignID, UserID, Section, StuRegisStatus) VALUES (?, ?, ?, ?, ?)`, 
+            [newStuRegisID, tAssignID, userId, 1, 'ENROLLED']
         );
         
         res.redirect('/registration?status=added');
@@ -365,17 +417,40 @@ app.post('/login', async (req, res) => {
     } catch (err) { res.status(500).send(err.message); }
 });
 
-app.get('/register', (req, res) => res.render('register'));
-
-app.post('/register', async (req, res) => {
-    const { UserID, UserFName, UserLName, UserEmail, UserPass } = req.body;
+// ==========================================
+// แสดงหน้าฟอร์มสมัครสมาชิก
+// ==========================================
+app.get('/register', async (req, res) => {
     try {
+        // ดึงข้อมูลคณะและสาขาจาก Database
+        const [faculties] = await pool.query('SELECT * FROM Fact');
+        const [majors] = await pool.query('SELECT * FROM Major');
+        
+        // ส่งข้อมูลไปที่หน้า register.ejs
+        res.render('register', { faculties, majors });
+    } catch (err) {
+        res.send("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err.message);
+    }
+});
+
+// ==========================================
+// รับค่าจากฟอร์มเพื่อบันทึกลง Database
+// ==========================================
+app.post('/register', async (req, res) => {
+    // 🌟 รับค่า FCode และ MjCode เพิ่มเติมจากฟอร์ม
+    const { UserID, UserFName, UserLName, UserEmail, UserPass, FCode, MjCode } = req.body;
+    
+    try {
+        // 🌟 เพิ่ม FCode และ MjCode ลงในคำสั่ง INSERT
         await pool.query(
-            'INSERT INTO UserInfo (UserID, UserFName, UserLName, UserEmail, UserPass, UserType) VALUES (?, ?, ?, ?, ?, "STD")',
-            [UserID, UserFName, UserLName, UserEmail, UserPass]
+            `INSERT INTO UserInfo (UserID, UserFName, UserLName, UserEmail, UserPass, FCode, MjCode, UserType) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, "STD")`,
+            [UserID, UserFName, UserLName, UserEmail, UserPass, FCode, MjCode]
         );
         res.redirect('/login');
-    } catch (err) { res.send("เกิดข้อผิดพลาดในการสมัคร: " + err.message); }
+    } catch (err) { 
+        res.send("เกิดข้อผิดพลาดในการสมัคร: " + err.message); 
+    }
 });
 
 app.get('/logout', (req, res) => {

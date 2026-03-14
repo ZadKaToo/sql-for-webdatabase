@@ -11,8 +11,8 @@
 <body>
 <div class="d-flex">
     <%- include('partials/sidebar') %>
+    
     <div class="w-100" style="margin-left: 260px;">
-
         <div class="page-header">
             <h1>University Events</h1>
             <p>ค้นหาและลงทะเบียนเข้าร่วมกิจกรรมเพื่อเก็บชั่วโมงกิจกรรม</p>
@@ -36,7 +36,10 @@
                                         <div class="event-name"><%= evt.EventName %></div>
                                         <div class="event-end">ถึง <%= new Date(evt.EventEndDate).toLocaleDateString('th-TH') %></div>
                                     </div>
-                                    <button class="btn-office" style="flex-shrink:0;">+ ลงทะเบียน</button>
+                                    <form action="/register-event" method="POST" style="margin: 0;">
+                                        <input type="hidden" name="eventId" value="<%= evt.EventID %>">
+                                        <button type="submit" class="btn-office" style="flex-shrink:0;">+ ลงทะเบียน</button>
+                                    </form>
                                 </div>
                             <% }) %>
                         <% } else { %>
@@ -50,13 +53,21 @@
                         <div class="panel-head">กิจกรรมที่ฉันเข้าร่วม</div>
                         <% if(myEvents.length > 0) { %>
                             <% myEvents.forEach(my => { %>
-                                <div class="my-event-item">
+                                <div class="my-event-item" style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
-                                            <div class="name"><%= my.EventName %></div>
-                                            <div class="date"><%= new Date(my.EventStartDate).toLocaleDateString('th-TH') %></div>
+                                            <div class="name" style="font-weight: 500;"><%= my.EventName %></div>
+                                            <div class="date" style="font-size: 12px; color: #9B9790;">
+                                                <%= new Date(my.EventStartDate).toLocaleDateString('th-TH') %>
+                                            </div>
                                         </div>
-                                        <span class="registered-tag">ลงทะเบียนแล้ว</span>
+                                        <div class="text-end">
+                                            <span class="registered-tag d-block mb-2" style="font-size: 11px; background: #e6f4ea; color: #1e8e3e; padding: 2px 8px; border-radius: 12px;">ลงทะเบียนแล้ว</span>
+                                            <form action="/cancel-event" method="POST" style="margin: 0;">
+                                                <input type="hidden" name="eventId" value="<%= my.EventID %>">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 11px; padding: 2px 8px;">ยกเลิก</button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             <% }) %>
@@ -66,10 +77,6 @@
                     </div>
                 </div>
 
-            </div>
-        </div>
-    </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            </div> </div> </div> </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

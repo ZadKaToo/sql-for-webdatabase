@@ -136,13 +136,36 @@
         });
     }
 
-    // ดักสถานะหลังกดยืนยันเพื่อโชว์แจ้งเตือน
+    // รวมเช็ค status ทั้งหมดให้อยู่ในบล็อกนี้
     document.addEventListener("DOMContentLoaded", function() {
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('status') === 'locked') {
+        const status = urlParams.get('status');
+
+        if (status === 'locked') {
             Swal.fire({
                 toast: true, position: 'bottom', width: '100%', background: '#1A1916', color: '#F7F6F4',
                 icon: 'success', title: 'ยืนยันการลงทะเบียนเรียบร้อยแล้ว', showConfirmButton: false, timer: 3000,
+                customClass: { popup: 'custom-toast rounded-0 m-0' }
+            });
+            window.history.replaceState(null, null, window.location.pathname);
+        } else if (status === 'error') {
+            Swal.fire({
+                toast: true, position: 'bottom', width: '100%', background: '#ff4c4c', color: '#FFFFFF',
+                icon: 'error', title: 'เกิดข้อผิดพลาดในการทำรายการ (เช็ค Terminal)', showConfirmButton: false, timer: 3000,
+                customClass: { popup: 'custom-toast rounded-0 m-0' }
+            });
+            window.history.replaceState(null, null, window.location.pathname);
+        } else if (status === 'added') {
+            Swal.fire({
+                toast: true, position: 'bottom', width: '100%', background: '#1A1916', color: '#F7F6F4',
+                icon: 'success', title: 'เพิ่มวิชาสำเร็จ', showConfirmButton: false, timer: 3000,
+                customClass: { popup: 'custom-toast rounded-0 m-0' }
+            });
+            window.history.replaceState(null, null, window.location.pathname);
+        } else if (status === 'removed') {
+            Swal.fire({
+                toast: true, position: 'bottom', width: '100%', background: '#1A1916', color: '#F7F6F4',
+                icon: 'info', title: 'ถอนรายวิชาเรียบร้อยแล้ว', showConfirmButton: false, timer: 3000,
                 customClass: { popup: 'custom-toast rounded-0 m-0' }
             });
             window.history.replaceState(null, null, window.location.pathname);
