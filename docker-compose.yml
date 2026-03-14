@@ -5,8 +5,8 @@ services:
     command: --default-authentication-plugin=mysql_native_password 
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: my_web_db
+      MYSQL_ROOT_PASSWORD: NULL
+      MYSQL_DATABASE: NULL
       MYSQL_ROOT_HOST: '%'           # 👈 เพิ่มบรรทัดนี้ (สำคัญมาก!)
     ports:
       - "3306:3306"
