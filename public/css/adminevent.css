@@ -1,0 +1,87 @@
+/* Base Styles ของคุณ */
+        body { 
+            background: #EEECE9; 
+            font-family: 'DM Sans', sans-serif; 
+            color: #1A1916; 
+            margin: 0;
+            display: flex; /* เปิดใช้งาน Flexbox สำหรับ Sidebar + Content */
+            min-height: 100vh;
+        }
+
+        /* เอา Sidebar มาวางไว้ซ้ายมือ */
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            background: #F7F6F4;
+            border-right: 1px solid #DDDBD7;
+            /* สมมติว่าในไฟล์ sidebar ของคุณมีสไตล์เฉพาะอยู่แล้ว */
+        }
+
+        /* ส่วนพื้นที่เนื้อหาหลัก */
+        .main-content {
+            flex-grow: 1;
+            background: #EEECE9;
+        }
+
+        /* Header และ Content Wrap ของคุณ */
+        .page-header { background: #F7F6F4; border-bottom: 1px solid #DDDBD7; padding: 32px 40px 28px; }
+        .page-header h1 { font-size: 18px; font-weight: 500; letter-spacing: 0.01em; margin-bottom: 0; }
+        .page-header p  { font-size: 12.5px; color: #9B9790; margin: 4px 0 0; font-weight: 300; }
+
+        .content-wrap { padding: 32px 40px; }
+
+        .panel { background: #F7F6F4; border: 1px solid #DDDBD7; border-radius: 4px; }
+
+        .panel-head {
+            padding: 16px 20px;
+            border-bottom: 1px solid #DDDBD7;
+            font-size: 11px;
+            font-family: 'DM Mono', monospace;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #9B9790;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            border-radius: 4px 4px 0 0;
+        }
+
+        /* Form Styles ของคุณ */
+        .field { padding: 20px 20px 0; }
+        .field label { font-size: 11px; font-family: 'DM Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: #9B9790; display: block; margin-bottom: 7px; }
+
+        .field select,
+        .field input,
+        .field textarea {
+            width: 100%;
+            background: #EEECE9;
+            border: 1px solid #DDDBD7;
+            border-radius: 0;
+            padding: 9px 12px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            color: #1A1916;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .field select:focus,
+        .field input:focus,
+        .field textarea:focus { border-color: #1A1916; }
+
+        .form-footer { padding: 20px; }
+
+        .btn-office-dark {
+            width: 100%;
+            background: #1A1916;
+            color: #F7F6F4;
+            border: 1px solid #1A1916;
+            padding: 10px;
+            font-size: 13px;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-family: 'DM Sans', sans-serif;
+            border-radius: 2px;
+        }
+        .btn-office-dark:hover { background: #2E2C29; }

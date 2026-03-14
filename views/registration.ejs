@@ -21,7 +21,6 @@
         <div class="content-wrap">
             <div class="row g-4">
 
-                <!-- Available courses -->
                 <div class="col-lg-8">
                     <div class="panel">
                         <div class="panel-head">รายวิชาที่เปิดสอน</div>
@@ -41,10 +40,16 @@
                                             <span class="meta-tag">งาน <%= taskCount %> ชิ้น</span>
                                         </div>
                                     </div>
+                                    
+                                    <% if (!isConfirmed) { %>
                                     <form action="/add-course" method="POST">
                                         <input type="hidden" name="tAssignID" value="<%= course.TAssignID %>">
                                         <button type="submit" class="btn-office">+ เพิ่มวิชา</button>
                                     </form>
+                                    <% } else { %>
+                                        <span style="font-size:11.5px; color:#9B9790;"><i class="bi bi-lock-fill"></i> ปิดรับ</span>
+                                    <% } %>
+
                                 </div>
                             <% }) %>
                         <% } else { %>
@@ -53,7 +58,6 @@
                     </div>
                 </div>
 
-                <!-- My courses -->
                 <div class="col-lg-4">
                     <div class="panel" style="position:sticky; top:20px;">
                         <div class="panel-head">รายวิชาของฉัน</div>
@@ -71,10 +75,14 @@
                                         <div class="my-course-name"><%= my.SubjName %></div>
                                         <div style="margin-top:4px;"><span style="font-family:'DM Mono',monospace; font-size:9.5px; background:#E8E6E1; color:#5A5752; padding:2px 7px;"><%= my.StudyDay %></span></div>
                                     </div>
+                                    
+                                    <% if (!isConfirmed) { %>
                                     <form action="/remove-course" method="POST">
                                         <input type="hidden" name="stuRegisID" value="<%= my.StuRegisID %>">
                                         <button type="submit" class="btn-remove"><i class="bi bi-x"></i></button>
                                     </form>
+                                    <% } %>
+
                                 </div>
                             <% }) %>
                         <% } else { %>
@@ -82,8 +90,17 @@
                         <% } %>
 
                         <div style="padding:16px 20px; border-top:1px solid #DDDBD7;">
-                            <button class="btn-office btn-office-dark" style="width:100%;">ยืนยันการลงทะเบียน</button>
+                            <% if (!isConfirmed) { %>
+                                <form action="/confirm-registration" method="POST" id="confirmForm">
+                                    <button type="button" class="btn-office btn-office-dark" style="width:100%;" onclick="confirmRegistration()">ยืนยันการลงทะเบียน</button>
+                                </form>
+                            <% } else { %>
+                                <div style="text-align:center; font-size:13px; font-weight:500; color:#1A1916; background:#E8E6E1; padding:10px; border:1px solid #DDDBD7;">
+                                    <i class="bi bi-check-circle-fill text-success"></i> ยืนยันการลงทะเบียนสำเร็จแล้ว
+                                </div>
+                            <% } %>
                         </div>
+
                     </div>
                 </div>
 
@@ -91,6 +108,47 @@
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<%- include('partials/footer') %>
+
+<script>
+    function confirmRegistration() {
+        Swal.fire({
+            title: 'ยืนยันการลงทะเบียน?',
+            text: "หากยืนยันแล้ว จะไม่สามารถเพิ่มหรือลดรายวิชาได้อีก!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#1A1916',
+            cancelButtonColor: '#9B9790',
+            confirmButtonText: 'ยืนยันเลย',
+            cancelButtonText: 'ขอกลับไปดูก่อน',
+            customClass: {
+                popup: 'rounded-0',
+                confirmButton: 'rounded-0',
+                cancelButton: 'rounded-0'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('confirmForm').submit();
+            }
+        });
+    }
+
+    // ดักสถานะหลังกดยืนยันเพื่อโชว์แจ้งเตือน
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('status') === 'locked') {
+            Swal.fire({
+                toast: true, position: 'bottom', width: '100%', background: '#1A1916', color: '#F7F6F4',
+                icon: 'success', title: 'ยืนยันการลงทะเบียนเรียบร้อยแล้ว', showConfirmButton: false, timer: 3000,
+                customClass: { popup: 'custom-toast rounded-0 m-0' }
+            });
+            window.history.replaceState(null, null, window.location.pathname);
+        }
+    });
+</script>
+
 </body>
 </html>

@@ -1,0 +1,52 @@
+<link rel="stylesheet" href="/css/footer.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+<% if (typeof latestEvent !== 'undefined' && latestEvent) { %>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // รับค่ากิจกรรมล่าสุดจาก Backend
+        const eventId = "<%= latestEvent.EventID %>";
+        const eventName = "<%= latestEvent.EventName %>";
+        const eventType = "<%= latestEvent.EventType %>";
+
+        // เช็คว่าใน Session (การล็อกอินครั้งนี้) เคยโชว์ Pop-up ของกิจกรรมนี้ไปหรือยัง?
+        const isAlreadySeen = sessionStorage.getItem("seen_event_" + eventId);
+
+        if (!isAlreadySeen) {
+            Swal.fire({
+                toast: true,
+                position: 'bottom',
+                width: '100%',
+                background: '#1A1916',
+                color: '#F7F6F4',
+                icon: 'info',
+                iconColor: '#F7F6F4',
+                title: `[NEW] กิจกรรม: ${eventName}`,
+                text: `ประเภท: ${eventType} | ลงทะเบียนเข้าร่วมได้แล้ววันนี้`,
+                showConfirmButton: true,
+                confirmButtonText: 'ดูรายละเอียด',
+                showCloseButton: true,
+                customClass: {
+                    popup: 'custom-toast rounded-0 m-0', // ทำให้แนบชิดขอบจอและไม่มีขอบมน
+                    confirmButton: 'btn-office-dark px-4 py-2 rounded-0', // ใช้คลาสปุ่มจากธีมของคุณ
+                    closeButton: 'text-light'
+                }
+            }).then((result) => {
+                // บันทึกว่าเห็นแล้ว
+                sessionStorage.setItem("seen_event_" + eventId, "true");
+                
+                // ถ้านักศึกษากดปุ่มดูรายละเอียด
+                if (result.isConfirmed) {
+                    window.location.href = '/events'; 
+                }
+            });
+
+            // ดักจับเวลากดปุ่ม X (ปิด)
+            document.querySelector('.swal2-close')?.addEventListener('click', () => {
+                sessionStorage.setItem("seen_event_" + eventId, "true");
+            });
+        }
+    });
+</script>
+<% } %>

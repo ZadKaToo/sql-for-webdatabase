@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>เพิ่มกิจกรรมใหม่ (Admin) | UMS PORTAL</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/css/adminevent.css">
+</head>
+<body>
+
+    <%- include('partials/sidebar') %>
+
+    <main class="main-content">
+        
+        <div class="page-header">
+            <h1><i class="bi bi-calendar-plus me-2"></i>เพิ่มกิจกรรมใหม่</h1>
+            <p>ระบบสร้างกิจกรรมและแจ้งเตือนนักศึกษาแบบ Real-time</p>
+        </div>
+
+        <div class="content-wrap">
+            <div class="panel" style="max-width: 600px;">
+                <div class="panel-head">
+                    <span>รายละเอียดกิจกรรม</span>
+                    <i class="bi bi-card-text"></i>
+                </div>
+                
+                <form action="/admin/add-event" method="POST">
+                    <div class="field">
+                        <label>ชื่อกิจกรรม</label>
+                        <input type="text" name="EventName" required placeholder="เช่น งานเปิดโลกกิจกรรม...">
+                    </div>
+                    
+                    <div class="field">
+                        <label>ประเภทกิจกรรม</label>
+                        <select name="EventType" required>
+                            <option value="" disabled selected>-- เลือกประเภท --</option>
+                            <option value="วิชาการ">วิชาการ</option>
+                            <option value="จิตอาสา">จิตอาสา</option>
+                            <option value="นันทนาการ">นันทนาการ</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex">
+                        <div class="field w-50">
+                            <label>วันที่เริ่ม</label>
+                            <input type="date" name="EventStartDate" required>
+                        </div>
+                        <div class="field w-50">
+                            <label>วันที่สิ้นสุด</label>
+                            <input type="date" name="EventEndDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-footer mt-2">
+                        <button type="submit" class="btn-office-dark">บันทึกและแจ้งเตือนนักศึกษา</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <% if (typeof success !== 'undefined' && success) { %>
+        <script>
+            Swal.fire({
+                title: 'สำเร็จ!',
+                text: 'สร้างกิจกรรมและส่งการแจ้งเตือนเรียบร้อยแล้ว',
+                icon: 'success',
+                background: '#F7F6F4',
+                color: '#1A1916',
+                confirmButtonColor: '#1A1916',
+                confirmButtonText: 'ตกลง'
+            });
+        </script>
+    <% } %>
+
+</body>
+</html>

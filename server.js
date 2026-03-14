@@ -1,6 +1,11 @@
 const express = require('express');
 const mysql = require('mysql2/promise');
+const http = require('http'); // 🌟 เพิ่มใหม่: นำเข้า http module
+const { Server } = require('socket.io'); // 🌟 เพิ่มใหม่: นำเข้า Socket.io
+
 const app = express();
+const server = http.createServer(app); // 🌟 เพิ่มใหม่: เอา app ไปผูกกับ http server
+const io = new Server(server); // 🌟 เพิ่มใหม่: เปิดใช้งาน Socket.io
 
 const pool = mysql.createPool({
   host: 'db',
@@ -31,6 +36,68 @@ const requireLogin = (req, res, next) => {
     next();
 };
 
+// 🌟 เพิ่มใหม่: ตั้งค่าการเชื่อมต่อ Socket.io
+io.on('connection', (socket) => {
+    console.log('🟢 มีผู้ใช้งานเชื่อมต่อ Socket (ID:', socket.id, ')');
+});
+
+// ==========================================
+// 🌟 เพิ่มใหม่: หน้า Admin เพิ่มกิจกรรม (Add Event)
+// ==========================================
+app.get('/admin/add-event', requireLogin, (req, res) => {
+    // ป้องกันนักศึกษาแอบเข้าหน้านี้
+    if (req.session.user.UserType !== 'ADMIN') {
+        return res.status(403).send("คุณไม่มีสิทธิ์เข้าถึงหน้านี้");
+    }
+    const isSuccess = req.query.success === 'true'; 
+    res.render('admin-add-event', { success: isSuccess, page: 'events', user: req.session.user });
+});
+
+app.post('/admin/add-event', requireLogin, async (req, res) => {
+    // เช็คสิทธิ์แอดมิน
+    if (req.session.user.UserType !== 'ADMIN') {
+        return res.status(403).send("คุณไม่มีสิทธิ์ทำรายการนี้");
+    }
+    
+    const { EventName, EventType, EventStartDate, EventEndDate } = req.body;
+    
+    try {
+        // 🌟 1. หา EventID ที่ค่ามากที่สุดในฐานข้อมูล
+        const [rows] = await pool.query('SELECT MAX(EventID) as maxId FROM Event');
+        let newEventID = 'E001'; // กำหนดค่าเริ่มต้น ถ้าตารางนี้ยังไม่เคยมีข้อมูลเลย
+
+        if (rows[0].maxId) {
+            let currentMaxId = rows[0].maxId; // สมมติว่าได้ 'E001' มา
+            
+            // ตรวจสอบว่า ID ปัจจุบันเป็นตัวอักษรผสมตัวเลข (เช่น E001) หรือตัวเลขล้วน
+            let numPart = parseInt(currentMaxId.substring(1)); // ตัดตัวอักษรตัวแรกออก แล้วแปลงเป็นตัวเลข
+            
+            if (!isNaN(numPart)) {
+                // ถ้าเป็นรูปแบบ E001 -> ให้เอาตัวเลขมา +1 แล้วเติม 0 ให้ครบ 3 หลัก (กลายเป็น E002)
+                newEventID = 'E' + (numPart + 1).toString().padStart(3, '0'); 
+            } else {
+                // กรณีถ้าของเดิมคุณใช้ตัวเลขล้วนๆ 4 หลัก (เช่น 1000)
+                newEventID = (parseInt(currentMaxId) + 1).toString().padStart(4, '0');
+            }
+        }
+
+        // 🌟 2. บันทึกข้อมูลลง Database พร้อม ID ที่สร้างขึ้นมาใหม่
+        const sql = `INSERT INTO Event (EventID, EventName, EventType, EventStartDate, EventEndDate) VALUES (?, ?, ?, ?, ?)`;
+        await pool.query(sql, [newEventID, EventName, EventType, EventStartDate, EventEndDate]);
+        
+        // 🌟 3. สั่งให้ Socket.io แจ้งเตือนนักศึกษา
+        io.emit('new_event_alert', { 
+            name: EventName, 
+            type: EventType 
+        });
+
+        res.redirect('/admin/add-event?success=true');
+    } catch (error) {
+        console.error("Error inserting event:", error);
+        res.status(500).send("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + error.message);
+    }
+});
+
 // ==========================================
 // 1. หน้า LMS (การบ้าน & เกรด)
 // ==========================================
@@ -40,7 +107,6 @@ app.get('/lms', requireLogin, async (req, res) => {
     const isAdmin = user.UserType === 'ADMIN';
     const params = isAdmin ? [] : [user.UserID];
 
-    // เรียกใช้ View แทนการ JOIN ยาวๆ
     let assignQuery = isAdmin 
       ? `SELECT sa.AssName, s.SubjName, sa.Dateline, sa.Score, IFNULL(ans.Status, 'ยังไม่ส่ง') as Status 
          FROM StdAssignment sa JOIN Subject s ON sa.SubjCode = s.SubjCode LEFT JOIN AssignScore ans ON sa.AssignID = ans.AssignID ORDER BY sa.Dateline ASC`
@@ -64,7 +130,10 @@ app.get('/registration', requireLogin, async (req, res) => {
   try {
     const userId = req.session.user.UserID;
 
-    // ใช้ View v_course_details และ v_student_registered_courses
+    // 🌟 ดึงสถานะว่านักศึกษาคนนี้กดยืนยัน (ล็อค) หรือยัง?
+    const [statusRows] = await pool.query('SELECT Status FROM RegistrationStatus WHERE UserID = ?', [userId]);
+    const isConfirmed = statusRows.length > 0 && statusRows[0].Status === 'CONFIRMED';
+
     const [availableCourses] = await pool.query(
       `SELECT * FROM v_course_details WHERE TAssignID NOT IN (SELECT TAssignID FROM StudyRegister WHERE UserID = ?) ORDER BY SubjCode ASC`, 
       [userId]
@@ -74,8 +143,90 @@ app.get('/registration', requireLogin, async (req, res) => {
     
     let totalCredits = myCourses.reduce((sum, course) => sum + course.SubjCredit, 0);
     
-    res.render('registration', { availableCourses, myCourses, totalCredits, workloads, page: 'registration', user: req.session.user });
+    res.render('registration', { 
+        availableCourses, 
+        myCourses, 
+        totalCredits, 
+        workloads, 
+        isConfirmed, // 🌟 ส่งตัวแปรนี้ไปซ่อนปุ่มที่หน้าเว็บ
+        page: 'registration', 
+        user: req.session.user 
+    });
   } catch (err) { res.status(500).send("Registration System Error: " + err.message); }
+});
+
+// ==========================================
+// 2. Route รับค่าตอนกด "ยืนยันการลงทะเบียน"
+// ==========================================
+app.post('/confirm-registration', requireLogin, async (req, res) => {
+    try {
+        const userId = req.session.user.UserID;
+        
+        // บันทึกสถานะว่า 'CONFIRMED' ลง Database
+        await pool.query(`
+            INSERT INTO RegistrationStatus (UserID, Status) 
+            VALUES (?, 'CONFIRMED') 
+            ON DUPLICATE KEY UPDATE Status = 'CONFIRMED'
+        `, [userId]);
+        
+        res.redirect('/registration?status=locked');
+    } catch (err) {
+        console.error("Confirm Error:", err);
+        res.redirect('/registration?status=error');
+    }
+});
+
+// ==========================================
+// 3. Route สำหรับกด "+ เพิ่มวิชา"
+// ==========================================
+app.post('/add-course', requireLogin, async (req, res) => {
+    try {
+        const userId = req.session.user.UserID;
+        const { tAssignID } = req.body;
+
+        // เช็คก่อนว่ากดยืนยัน (ล็อค) ไปหรือยัง เผื่อคนแอบยิง API เข้ามา
+        const [statusRows] = await pool.query('SELECT Status FROM RegistrationStatus WHERE UserID = ?', [userId]);
+        if (statusRows.length > 0 && statusRows[0].Status === 'CONFIRMED') {
+            return res.redirect('/registration?status=locked');
+        }
+
+        // บันทึกลงตาราง StudyRegister 
+        // (สมมติว่าตารางนี้มีแค่ UserID กับ TAssignID ถ้ามีคอลัมน์อื่นที่จำเป็นต้องใส่แจ้งได้นะครับ)
+        await pool.query(
+            `INSERT INTO StudyRegister (UserID, TAssignID) VALUES (?, ?)`, 
+            [userId, tAssignID]
+        );
+        
+        res.redirect('/registration?status=added');
+    } catch (err) {
+        console.error("Add Course Error:", err);
+        res.redirect('/registration?status=error');
+    }
+});
+
+// ==========================================
+// 4. Route สำหรับกด "กากบาทลบวิชา"
+// ==========================================
+app.post('/remove-course', requireLogin, async (req, res) => {
+    try {
+        const userId = req.session.user.UserID;
+        const { stuRegisID } = req.body; 
+
+        // เช็คก่อนว่ากดยืนยัน (ล็อค) ไปหรือยัง
+        const [statusRows] = await pool.query('SELECT Status FROM RegistrationStatus WHERE UserID = ?', [userId]);
+        if (statusRows.length > 0 && statusRows[0].Status === 'CONFIRMED') {
+            return res.redirect('/registration?status=locked');
+        }
+
+        // ลบวิชาออกจากตาราง StudyRegister
+        // หมายเหตุ: อิงตามค่า name="stuRegisID" ที่ส่งมาจากหน้า EJS
+        await pool.query(`DELETE FROM StudyRegister WHERE StuRegisID = ? AND UserID = ?`, [stuRegisID, userId]);
+        
+        res.redirect('/registration?status=removed');
+    } catch (err) {
+        console.error("Remove Course Error:", err);
+        res.redirect('/registration?status=error');
+    }
 });
 
 // ==========================================
@@ -113,7 +264,6 @@ app.get('/academic', requireLogin, async (req, res) => {
 
     const [curriculum] = await pool.query(`SELECT f.FNameENG as Faculty, m.MjNameENG as Major FROM Fact f JOIN Major m ON f.FCode = m.FCode`);
     
-    // Admin เห็นตารางสอนรวม (v_course_details), นศ. เห็นตารางตัวเอง (student_daily_schedule)
     let scheduleQuery = isAdmin 
       ? `SELECT * FROM v_course_details ORDER BY FIELD(StudyDay, 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'), StartTime`
       : `SELECT * FROM student_daily_schedule WHERE UserID = ? ORDER BY FIELD(StudyDay, 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'), StartTime`;
@@ -130,7 +280,6 @@ app.get('/evaluation', requireLogin, async (req, res) => {
   try {
     const userId = req.session.user.UserID; 
     
-    // หาว่ามีงานอะไรที่ส่งแล้วแต่ยังไม่ได้ประเมิน (อันนี้ยังต้อง JOIN เล็กน้อยเพราะเงื่อนไข NOT IN ซับซ้อน)
     const [pendingReviews] = await pool.query(`
       SELECT ans.AssignID, sa.AssName, s.SubjName, CONCAT(t.TFName, ' ', t.TLName) AS TeacherName
       FROM AssignScore ans
@@ -142,7 +291,6 @@ app.get('/evaluation', requireLogin, async (req, res) => {
         AND sa.AssignID NOT IN (SELECT AssignID FROM ReviewTeacher WHERE UserID = ?)
     `, [userId, userId]);
 
-    // ใช้ View ดึงประวัติการประเมินที่เคยทำไปแล้ว
     const [myReviews] = await pool.query(`SELECT * FROM v_student_completed_reviews WHERE UserID = ?`, [userId]);
     const [teacherReviews] = await pool.query('SELECT * FROM v_teacher_reviews ORDER BY AvgRating DESC');
 
@@ -158,33 +306,40 @@ app.get('/', requireLogin, async (req, res) => {
     const user = req.session.user;
     const isAdmin = user.UserType === 'ADMIN';
 
-    // กำหนด Query ตามประเภท User
     const gpaQuery = isAdmin ? 'SELECT ROUND(AVG(GPAX), 2) as GPAX FROM v_student_gpa' : 'SELECT * FROM v_student_gpa WHERE UserID = ?';
     const scheduleQuery = isAdmin ? 'SELECT * FROM student_daily_schedule' : 'SELECT * FROM student_daily_schedule WHERE UserID = ?';
     const pendingQuery = isAdmin ? 'SELECT * FROM student_pending_assignments' : 'SELECT * FROM student_pending_assignments WHERE UserID = ?';
     const dashQuery = isAdmin ? 'SELECT * FROM v_student_dashboard' : 'SELECT * FROM v_student_dashboard WHERE UserID = ?';
     const creditsQuery = isAdmin ? 'SELECT SUM(TotalEnrolledCredits) as TotalEnrolledCredits FROM v_student_credits' : 'SELECT * FROM v_student_credits WHERE UserID = ?';
     
+    // 🌟 ดึงกิจกรรมที่ถูกสร้างล่าสุด 1 อัน (เรียงจากวันที่สร้าง หรือวันที่เริ่มกิจกรรม)
+    const latestEventQuery = 'SELECT * FROM Event ORDER BY EventID DESC LIMIT 1';
+    
     const params = isAdmin ? [] : [user.UserID];
 
     const [
       [gpa], [schedule], [pending], [dashboard], 
-      [credits], [workload], [reviews], [facultyStats]
+      [credits], [workload], [reviews], [facultyStats],
+      [latestEventRows] // 🌟 มารับค่ากิจกรรมล่าสุดตรงนี้
     ] = await Promise.all([
       pool.query(gpaQuery, params),
       pool.query(scheduleQuery, params),
       pool.query(pendingQuery, params),
       pool.query(dashQuery, params),
       pool.query(creditsQuery, params),
-      pool.query('SELECT * FROM v_subject_workload'), // ตารางสรุปส่วนกลาง Admin/นศ. เห็นเหมือนกัน
+      pool.query('SELECT * FROM v_subject_workload'), 
       pool.query('SELECT * FROM v_teacher_reviews'),
-      pool.query('SELECT * FROM v_faculty_stats ORDER BY TotalStudents DESC') // แก้ Query ซ้ำให้แล้ว
+      pool.query('SELECT * FROM v_faculty_stats ORDER BY TotalStudents DESC'),
+      pool.query(latestEventQuery) // 🌟 ยิง Query กิจกรรมล่าสุด
     ]);
 
-    // ส่งตัวแปร user ไปเผื่อนำไปใช้แสดงชื่อหรือปรับ UI 
+    // เช็คว่ามีกิจกรรมไหม ถ้ามีให้เอาตัวแรก ถ้าไม่มีให้เป็น null
+    const latestEvent = latestEventRows.length > 0 ? latestEventRows[0] : null;
+
     res.render('index', { 
       gpa, schedule, pending, dashboard, 
       credits, workload, reviews, facStats: facultyStats, facultyStats,
+      latestEvent, // 🌟 ส่งตัวแปรกิจกรรมล่าสุดไปที่หน้าเว็บ
       page: 'dashboard', user 
     });
   } catch (err) {
@@ -193,7 +348,7 @@ app.get('/', requireLogin, async (req, res) => {
 });
 
 // ==========================================
-// ส่วนของการ Login / Register / Settings (ตามเดิม)
+// ส่วนของการ Login / Register / Settings
 // ==========================================
 app.get('/login', (req, res) => res.render('login', { error: null }));
 
@@ -249,4 +404,5 @@ app.post('/settings', requireLogin, async (req, res) => {
     } catch (err) { res.status(500).send(err.message); }
 });
 
-app.listen(80, () => console.log('Admin & Student Portal Live!'));
+// 🌟 แก้ไข: เปลี่ยนจาก app.listen เป็น server.listen 
+server.listen(80, () => console.log('Admin & Student Portal Live on port 80!'));
